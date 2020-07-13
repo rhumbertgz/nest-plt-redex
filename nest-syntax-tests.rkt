@@ -1,167 +1,31 @@
 #lang racket
 
-(require redex "nest-syntax.rkt" "nest-utils.rkt")
+(require redex "nest-syntax.rkt")
 
-;;; #### BEGIN Message Selectors Tests #####
+(define valid-syntax? (redex-match? NEST e))
+
 (module+ test
-  (define mp1 (term (:header1 x y)))
-  (define mp2 (term (:header2 x x)))
-  (define mp3 (term (:header3 x x 3 #true)))
-  (define mp4 (term (header2 x x)))
 
-  (define valid-selector? (redex-match? Sparrow mp))
-
-  (test-equal (valid-selector? mp1) #true)
-  (test-equal (valid-selector? mp2) #true)
-  (test-equal (valid-selector? mp3) #true)
-  (test-equal (valid-selector? mp4) #false)
-)
-;;; #### END Message Selectors Tests #####
-
-
-;;; #### BEGIN Selector Type Tests #####
-(module+ test
+   ;;; #### BEGIN Selector Type Tests #####
   (define st1 (term :msg_a))
-  (define st2 (term msg_a))
 
-  (define valid-type? (redex-match? Sparrow h))
+  (test-equal (valid-syntax? st1) #true)
+  ;;; #### END Selector Type Tests #####
 
-  (test-equal (valid-type? st1) #true)
-  (test-equal (valid-type? st2) #false)
-)
-;;; #### END Selector Type Tests #####
+  ;;; #### BEGIN Message Selectors Tests #####
+  (define sl1 (term (:msg1 x y)))
+  (define sl2 (term (:msg2 x x)))
+  (define sl3 (term (:msg3 x x 3 #true)))
 
-
-
-;;; #### BEGIN Message Tests #####
-(module+ test
-  (define m1 (term (:msg_a 2 1)))
-  (define m2 (term (:msg_b 3 #true 3.3 "hi")))
-  (define m3 (term ("msg_a" x "hi")))
-  (define m4 (term (msg_d x x)))
-
-  (define valid-message? (redex-match? Sparrow m))
-
-  (test-equal (valid-message? m1) #true)
-  (test-equal (valid-message? m2) #true)
-  (test-equal (valid-message? m3) #false)
-  (test-equal (valid-message? m4) #false)
-)
-;;; #### END Message Tests #####
+  (test-equal (valid-syntax? sl1) #true)
+  (test-equal (valid-syntax? sl1) #true)
+  (test-equal (valid-syntax? sl2) #true)
+  (test-equal (valid-syntax? sl3) #true)
+  ;;; #### END Message Selectors Tests #####
 
 
-;;; #### BEGIN Message Match Tests #####
-(module+ test
- (test-equal  (message-match? m1 mp1) #true)
- (test-equal  (message-match? m2 mp2) #false)
- (test-equal  (message-match? m2 mp1) #false)
-)
-;;; #### END Message-To-MessagePattern-Match Tests #####
 
-
-;;; #### BEGIN Operators Tests #####
-;; Accumulation 
-(module+ test
-  (define a1 (term (count 3)))
-  (define a2 (term (count 3.3)))
-  (define a3 (term (count "2")))
-
-  (define valid-accumulation? (redex-match? Sparrow α))
-
-  (test-equal (valid-accumulation? a1) #true)
-  (test-equal (valid-accumulation? a2) #false)
-  (test-equal (valid-accumulation? a3) #false)
-)
-
-;; Time-units
-(module+ test
-  (define tu1 (term secs ))
-  (define tu2 (term mins ))
-  (define tu3 (term hours ))
-  (define tu4 (term days ))
-  (define tu5 (term weeks ))
-  (define tu6 (term months ))
-  (define tu7 (term 2 ))
-  (define tu8 (term "months" ))
-
-  (define valid-time-unit? (redex-match? Sparrow u))
-
-  (test-equal (valid-time-unit? tu1) #true)
-  (test-equal (valid-time-unit? tu2) #true)
-  (test-equal (valid-time-unit? tu3) #true)
-  (test-equal (valid-time-unit? tu4) #true)
-  (test-equal (valid-time-unit? tu5) #true)
-  (test-equal (valid-time-unit? tu6) #false)
-  (test-equal (valid-time-unit? tu7) #false)
-  (test-equal (valid-time-unit? tu8) #false)
-)
-
-;; Windows
-(module+ test
-  (define w1 (term (window 3 secs)))
-  (define w2 (term (window 4 mins)))
-  (define w3 (term (window 1 hours)))
-  (define w4 (term (window 2 days)))
-  (define w5 (term (window 3 weeks)))
-  (define w6 (term (window 3.3 mins)))
-  (define w7 (term (window "2" hours)))
-
-  (define valid-window? (redex-match? Sparrow τ))
-
-  (test-equal (valid-window? w1) #true)
-  (test-equal (valid-window? w2) #true)
-  (test-equal (valid-window? w3) #true)
-  (test-equal (valid-window? w4) #true)
-  (test-equal (valid-window? w5) #true)
-  (test-equal (valid-window? w6) #false)
-  (test-equal (valid-window? w7) #false)
-)
-
-;; Debounce
-(module+ test
-  (define d1 (term (debounce 3 secs)))
-  (define d2 (term (debounce 4 mins)))
-  (define d3 (term (debounce 1 hours)))
-  (define d4 (term (debounce 2 days)))
-  (define d5 (term (debounce 3 weeks)))
-  (define d6 (term (debounce 3.3 mins)))
-  (define d7 (term (debounce "2" hours)))
-
-  (define valid-debounce? (redex-match? Sparrow ∂))
-
-  (test-equal (valid-debounce? d1) #true)
-  (test-equal (valid-debounce? d2) #true)
-  (test-equal (valid-debounce? d3) #true)
-  (test-equal (valid-debounce? d4) #true)
-  (test-equal (valid-debounce? d5) #true)
-  (test-equal (valid-debounce? d6) #false)
-  (test-equal (valid-debounce? d7) #false)
-)
-
-
-;; Every
-(module+ test
-  (define e1 (term (every 3)))
-  (define e2 (term (every 4 mins)))
-  (define e3 (term (every hour)))
-  (define e4 (term (every "3")))
-  (define e5 (term (every 3.3)))
-
-  (define valid-every? (redex-match? Sparrow ℶ))
-
-  (test-equal (valid-every? e1) #true)
-  (test-equal (valid-every? e2) #false)
-  (test-equal (valid-every? e3) #false)
-  (test-equal (valid-every? e4) #false)
-  (test-equal (valid-every? e5) #false)
-)
-
-
-; #### END Operators Tests #####
-
-
-;; ##### BEGIN Arithmetic Operations Tets #####
-(module+ test
+  ;; ##### BEGIN Arithmetic Operations Tets #####
   (define sum (term (+ 3 4)))
   (define mult (term (* 4 5)))
   (define div (term (/ 3 5)))
@@ -170,117 +34,92 @@
   (define goe (term (>= 5 2)))
   (define loe (term (<= 5 2)))
 
-  (define math-op? (redex-match? Sparrow e))
+  (test-equal (valid-syntax? sum) #true)
+  (test-equal (valid-syntax? rest) #true)
+  (test-equal (valid-syntax? mult) #true)
+  (test-equal (valid-syntax? div) #true)
+  (test-equal (valid-syntax? goe) #true)
+  (test-equal (valid-syntax? loe) #true)
 
-  (test-equal (math-op? sum) #true)
-  (test-equal (math-op? rest) #true)
-  (test-equal (math-op? mult) #true)
-  (test-equal (math-op? div) #true)
-  (test-equal (math-op? goe) #true)
-  (test-equal (math-op? loe) #true)
-
-) 
-
-;; #### END Arithmetic Operations Tests #####
+  ;;; #### END Arithmetic Operations Tests #####
 
 
-;; ##### BEGIN Lambda Tets #####
-(module+ test
+  ;;; ##### BEGIN Lambda Tets #####
   (define fn1 (term (λ (x) (+ x x))))
   (define fn2 (term (λ (x y) (* x y))))
   (define fn3 (term (λ () #true)))
   (define fn4 (term (λ x #true)))
  
-  (define lambda? (redex-match? Sparrow e))
-
-  (test-equal (lambda? fn1) #true)
-  (test-equal (lambda? fn2) #true)
-  (test-equal (lambda? fn3) #true)
-  (test-equal (lambda? fn4) #false)) 
-;; #### END Lambda Tests #####
+  (test-equal (valid-syntax? fn1) #true)
+  (test-equal (valid-syntax? fn2) #true)
+  (test-equal (valid-syntax? fn3) #true)
+  (test-equal (valid-syntax? fn4) #false) 
+  ;;; #### END Lambda Tests #####
 
 
-;; ##### BEGIN Transformer Tests #####
-;; fold transformer
-(module+ test
-  (define fold1 (term (fold ,fn1)))
-  (define fold2 (term (fold () ,fn1)))
-
-  (define valid_fold? (redex-match? Sparrow f))
-
-  (test-equal (valid_fold? fold1) #true)
-  (test-equal (valid_fold? fold2) #false))
-
-;; bind
-(module+ test  
-  (define bind1 (term (bind x)))
-  (define bind2 (term (bind ())))
+  ;;; ##### BEGIN Patterns Tests #####
+  (define s01 (term (:msg1 a b)))
+  (define s02 (term ((:msg1 a b) (window: 4 mins))))
+  (define s03 (term ((:msg1 a b) (debounce: 4 mins))))
+  (define s04 (term ((:msg1 a b) (every: 4))))
+  (define s05 (term ((:msg1 a b) (count: 4))))
+  (define s06 (term (and (:msg1 a b) (:msg2 c d))))
+  (define s07 (term (when (and (:msg1 a b) (:msg2 c d)) (> a b))))
  
-  (define valid_bind? (redex-match? Sparrow b))
 
-  (test-equal (valid_bind? bind1) #true)
-  (test-equal (valid_bind? bind2) #false))
-;; ##### END Transformers Tests #####
+  (define p1 (term (pattern np1 ,s01)))
+  (define p2 (term (pattern np1 ,s02)))
+  (define p3 (term (pattern np1 ,s03)))
+  (define p4 (term (pattern np1 ,s04)))
+  (define p5 (term (pattern np1 ,s05)))
+  (define p6 (term (pattern np1 ,s06)))
+  (define p7 (term (pattern np1 ,s07)))
 
+  (test-equal (valid-syntax? p1) #true)
+  (test-equal (valid-syntax? p2) #true)
+  (test-equal (valid-syntax? p3) #true)
+  (test-equal (valid-syntax? p4) #true)
+  (test-equal (valid-syntax? p5) #true)
+  (test-equal (valid-syntax? p6) #true)
+  (test-equal (valid-syntax? p7) #true)
 
-;;; ##### BEGIN Patterns Tests #####
-;;; patterns
-;(module+ test
-;  (define p0 (term (pattern ,mp1 ,a1 ,w1 )))
-;  (define p1 (term (pattern ,mp1 ,a1 ,a1 ,w1 )))
-;  (define p2 (term (pattern ,mp1 ,a1 ,foldr1)))
-;  (define p3 (term (pattern ,mp1 ,a1 ,w1 ,map1 ,map1  ,foldr1)))
-;  (define p4 (term (pattern () )))
-;  (define p5 (term (pattern ,mp1)))
-;  
-;  (define pattern? (redex-match? Sparrow e))
-;  
-;  (test-equal (pattern? p0) #true)
-;  (test-equal (pattern? p1) #false)
-;  (test-equal (pattern? p2) #true)
-;  (test-equal (pattern? p3) #true)
-;  (test-equal (pattern? p4) #false)
-;  (test-equal (pattern? p5) #true))
-;;; ##### END Patterns Tests #####
+  ;;; ##### END Patterns Tests #####
 
+  ;;; ##### BEGIN Reaction Tests #####
 
-;; ##### BEGIN Reaction Tests #####
-(module+ test
-  (define r1 (term (react x ,fn1)))
-  (define r2 (term (react x)))
-  (define r3 (term (react ,fn1)))
+  (define rf1 (term (λ (l i t) (print "reaction 1"))))
+  (define r1 (term (reaction r1 ,rf1)))
+  (define r2 (term (reaction r1)))
   
-  (define reaction? (redex-match? Sparrow e))
+  (test-equal (valid-syntax? r1) #true)
+  (test-equal (valid-syntax? r2) #false)
 
-  (test-equal (reaction? r1) #true)
-  (test-equal (reaction? r2) #false)
-  (test-equal (reaction? r3) #false))
-;; ##### END Reaction Tests #####
+  ;;; ##### END Reaction Tests #####
 
 
-;; ##### BEGIN Send Tests #####
-(module+ test
+  ;;; ##### BEGIN Reaction Binding Tests #####
+  (define rb1 (term (react-to x ,r1)))
+  (define rb2 (term (react-to x)))
+  (define rb3 (term (react-to ,r1)))
+
+  (test-equal (valid-syntax? rb1) #true)
+  (test-equal (valid-syntax? rb2) #false)
+  (test-equal (valid-syntax? rb3) #false)
+  ;;; ##### END Reaction Tests #####
+
+
+  ;;; ##### BEGIN Send Tests #####
+  (define m1 (term (:msg1 2 6)))
   (define s1 (term (send x ,m1)))
   (define s2 (term (send x)))
   (define s3 (term (send ,fn1)))
-  
-  (define send? (redex-match? Sparrow e))
 
-  (test-equal (send? s1) #true)
-  (test-equal (send? s2) #false)
-  (test-equal (send? s3) #false))
-;; ##### END Reaction Tests #####
+  (test-equal (valid-syntax? s1) #true)
+  (test-equal (valid-syntax? s2) #false)
+  (test-equal (valid-syntax? s3) #false)
+  ;;; ##### END Reaction Tests #####
+)
 
-;;; ##### BEGIN Match Tests #####
-;(module+ test
-;  (define match1 (term (match ,p0 ,p2 ,p3)))
-;  (define match2 (term (match ,p0 ,p2 ,p2)))
-;   
-;  (define match? (redex-match? Sparrow e))
-;
-;  (test-equal (match? match1) #true)
-;  (test-equal (match? match2) #false))
-;;; ##### END Match Tests #####
 
 
 (module+ test
