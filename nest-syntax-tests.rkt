@@ -2,9 +2,9 @@
 
 (require redex "nest-syntax.rkt")
 
-(define valid-syntax? (redex-match? NEST e))
-
 (module+ test
+
+  (define valid-syntax? (redex-match? NEST e))
 
    ;;; #### BEGIN Selector Type Tests #####
   (define st1 (term :msg_a))
@@ -59,12 +59,12 @@
 
   ;;; ##### BEGIN Patterns Tests #####
   (define s01 (term (:msg1 a b)))
-  (define s02 (term ((:msg1 a b) (window: 4 mins))))
-  (define s03 (term ((:msg1 a b) (debounce: 4 mins))))
-  (define s04 (term ((:msg1 a b) (every: 4))))
-  (define s05 (term ((:msg1 a b) (count: 4))))
+  (define s02 (term ((:msg1 a b) (every 4))))
+  (define s03 (term ((:msg1 a b) (count 4))))
+  (define s04 (term ((:msg1 a b) (count 4) (fold ,fn1))))
+  (define s05 (term ((:msg1 a b) (count 4) (fold ,fn1) (bind x))))
   (define s06 (term (and (:msg1 a b) (:msg2 c d))))
-  (define s07 (term (when (and (:msg1 a b) (:msg2 c d)) (> a b))))
+  (define g06 (term (when (> a c))))
  
 
   (define p1 (term (pattern np1 ,s01)))
@@ -73,7 +73,7 @@
   (define p4 (term (pattern np1 ,s04)))
   (define p5 (term (pattern np1 ,s05)))
   (define p6 (term (pattern np1 ,s06)))
-  (define p7 (term (pattern np1 ,s07)))
+  (define p7 (term (pattern np1 ,s06 ,g06)))
 
   (test-equal (valid-syntax? p1) #true)
   (test-equal (valid-syntax? p2) #true)
@@ -86,9 +86,8 @@
   ;;; ##### END Patterns Tests #####
 
   ;;; ##### BEGIN Reaction Tests #####
-
-  (define rf1 (term (λ (l i t) (print "reaction 1"))))
-  (define r1 (term (reaction r1 ,rf1)))
+  
+  (define r1 (term (reaction r1 lm st #true)))
   (define r2 (term (reaction r1)))
   
   (test-equal (valid-syntax? r1) #true)
@@ -118,9 +117,7 @@
   (test-equal (valid-syntax? s2) #false)
   (test-equal (valid-syntax? s3) #false)
   ;;; ##### END Reaction Tests #####
+
+  (test-results)
+
 )
-
-
-
-(module+ test
-  (test-results))
