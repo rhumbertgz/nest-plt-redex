@@ -89,9 +89,11 @@
   
   (define r1 (term (reaction r1 lm st #true)))
   (define r2 (term (reaction r1)))
+  (define r3 (term (reaction r3 lm st "firing reaction 3")))
   
   (test-equal (valid-syntax? r1) #true)
   (test-equal (valid-syntax? r2) #false)
+  (test-equal (valid-syntax? r3) #true)
 
   ;;; ##### END Reaction Tests #####
 

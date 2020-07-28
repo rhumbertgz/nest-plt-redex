@@ -6,6 +6,7 @@
 
 (require redex)
 
+;; Abstract syntax
 ;; NEST's BNF grammar 
 (define-language NEST
   (e ::= 
@@ -40,12 +41,7 @@
   (v ::= nil number integer string boolean atom rf)   ;; values
   (atom ::= (variable-prefix :))
  
-;)
-;
-;;; Evaluation context
-;(define-extended-language NEST-Ev NEST
-;  (e ::= .... rf p pp ep s po pt t att m r id)                  ;; extend the meta-variable e with references 
-
+  ;; Evaluation context
   (rf ::= (ref id))                 ;; An actor reference or ID
     
   (K ::= (a ... A a ...))           ;; evaluation context for K
@@ -59,10 +55,7 @@
      (v ... E e ...)
      (let (x E) in e)
      (react-to E e)
-     ;(ref E)
      (react-to v E)
-     ;(new-actor E)
-     ;(pattern x E)
      (send E e)
      (send v E)
      (remove E e)
@@ -92,7 +85,6 @@
   (ep ::= s (s po pt ...))             ;; elementary pattern
   
   (rl ::= ((x . (x x e)) ...))             ;; reaction list
-  ;(r ::= (reaction x x e))                     ;; a reaction has a name, a single argument (a list) and a body
 
   (pr ::= ((rf . (rf ...)) ...))         ;; pattern-reaction registry
 
