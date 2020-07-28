@@ -1,17 +1,18 @@
 #lang racket
 
 (require redex "nest-syntax.rkt" "nest-utils.rkt")
-(provide NEST-R-Local)
+(provide NEST-Reductions)
 
-(define NEST-R-Local
+(define NEST-Reductions
   (reduction-relation
    NEST             ;; language
    #:domain k       ;; specifies a contract, in this case declaring that red relates terms matching the pattern p.
 
    ;;  Arithmetic operations
    (--> 
-    (in-hole K (/ number_1 0))
-    ,(error 'DivisionByZeroError)
+    ;;in-hole says K must be filled with (/ ......)
+    (in-hole K (/ number_1 0))         ;; pattern
+    ,(error 'DivisionByZeroError)      ;; expression
     "error")
    
    (--> 
@@ -111,30 +112,16 @@
     ((actor id_0 q_0 pl_0 rl_0 pr_0 any_0) ...  
      (actor id_1 q_1 pl_1 rl_1 pr_1 ())   
      (actor id_2 q_2 pl_2 rl_2 pr_2  any_2) ... 
-     (actor id_3 (ADD-MESSAGE q_3 ((id_msg tstamp e_msg))) pl_3 rl_3 pr_3  any_3)
+     (actor id_3 (ADD-MESSAGE q_3 ((id_msg x_tstamp e_msg))) pl_3 rl_3 pr_3  any_3)
      (actor id_n q_n pl_n rl_n pr_n  any_n) ...)
     (fresh id_msg)
-    (fresh tstamp)
+    (fresh x_tstamp)
     "send-message")
 
-;   (-->
-;    ((actor id_0 q_0 pl_0 rl_0 pr_0 any_0) ...  
-;     (actor id_1 q_1 pl_1 rl_1 pr_1 (in-hole E (send (ref id_3) e_msg)))   
-;     (actor id_2 q_2 pl_2 rl_2 pr_2  any_2) ... 
-;     (actor id_3 q_3 pl_3 rl_3 pr_3  any_3)
-;     (actor id_n q_n pl_n rl_n pr_n  any_n) ...)
-;
-;    ((actor id_0 q_0 pl_0 rl_0 pr_0 any_0) ...  
-;     (actor id_1 q_1 pl_1 rl_1 pr_1 ())   
-;     (actor id_2 q_2 pl_2 rl_2 pr_2  any_2) ... 
-;     (PROCESS-MESSAGE id_3 (ADD-MESSAGE q_3 ((id_msg tstamp e_msg))) pl_3 rl_3 pr_3  any_3)
-;     (actor id_n q_n pl_n rl_n pr_n  any_n) ...)
-;    (fresh id_msg)
-;    (fresh tstamp)
-;    "send-and-match-message")
 
+   (-->
+    (in-hole K  (actor id_a (m_a ... (id_msg x_tstamp e_msg)) pl_a rl_a pr_a  v_a))
+    (PROCESS-MESSAGE id_a (m_a ... (id_msg x_tstamp e_msg)) pl_a rl_a pr_a  v_a)
+    "process-message")
 
-   
    ))
-
-
