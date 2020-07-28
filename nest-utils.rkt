@@ -1,6 +1,7 @@
 #lang racket
 
 (require redex "nest-syntax.rkt")
+
 (provide (all-defined-out))
 
 
@@ -77,8 +78,7 @@
    ,(add-message (term (any_1 ...)) (term any_2))])
 
 (define (add-message l m)
-  (append l m)
-  )
+  (append l m))
 
 
 (define-metafunction NEST 
@@ -87,16 +87,118 @@
    ,(process-message (term any_id) (term any_q) (term any_p) (term any_r) (term any_pr) (term any_e))])
 
 (define (process-message id q pl rl pr b )
-  (displayln "process-message")
-  (displayln id)
-  (displayln q)
-  (displayln pl)
-  (displayln pr)
-  (displayln b)
- 
+  (let* 
+      ([results (foldr (lambda (value acc)
+                         (let 
+                             ([p (car value)]
+                              [matched (list-ref value 1)]
+                              [msgs (list-ref value 2)]
+                              [plist (car acc)]
+                              [act (cadr acc)]
+                              )         
+                           (set! plist (append plist (list p)))
+                           (cond
+                             [(eq? matched #t) (set! act (append act (list (list (get-reactions (car p) pr) msgs))))]
+                             [else 'continue])
+                           (list plist act)
+                           ))
+                       (list empty empty) 
+                       (foreach-pattern pl q))]
+       [npl (car results)]
+       [rout (eval-reactions rl (cadr results))])
+    (list (list 'actor id empty npl rl pr rout))
+    ))
+
+
+;((r1 lm st Reaction #1))
+;(((ref r1)) ((id_msg x_tstamp (:msg 1 2))))
+
+(define (eval-reactions rl act)
+  (let
+      ([rh (make-hash rl)])
+
+    (foldr (lambda (a acc)
+             (foldl (lambda (r acc2)
+                      (let*
+                          ([k (cadr r)]
+                           [v (hash-ref rh k 'nil)])
+                        (cond
+                          [(eq? v 'nil) acc2]
+                          [else (append acc2 (list (list-ref v 2)))])
+                        )
+                      )
+                    acc 
+                    (car a))
+             )
+           '() 
+           act)
+    ))
+
+
+(define (get-reactions pref rl)
+  (let* 
+      ([h (make-hash rl)])
+    (hash-ref h (list 'ref pref) 'nil)
+    ))  
+
+(define (foreach-pattern pl ml)
+  (foldr (lambda (p acc)
+           (append acc (list (check-msgs p ml))))
+         '()
+         pl))
+
+(define (check-msgs p ml) 
+  (foldr (lambda (msg acc)
+           (let*
+               ([pattern (cadr (car acc))]
+                [selector (get-selector pattern)]
+                [operator (get-operator pattern)])   
+             (cond
+               [(message-match? (list-ref msg 2)  selector) (check-pattern acc operator msg) ]
+               [else acc])
+             ))
+         (cons p (list #f empty)) ;; accumulator
+         ml)
   )
 
+;; composed selectors (using AND, OR...) are not handled
+(define (get-selector pstruct)
+  (let
+      ([s (car (car pstruct))])
+    (cond
+      [ (list? s) s ]
+      [else (car pstruct)])
+    )
+  
+  )
 
+;; only patterns with the count operator are handled
+(define (get-operator pstruct)
+  (cadr pstruct))
+
+(define (selector? s)
+  (string-prefix? (symbol->string s) ":"))
+
+
+(define (check-pattern ptr opr msg ) 
+  (cond
+    [ (eq? opr 'nil) (cons (car ptr) (list #t (list msg) ))] ;; no Group operator
+    [else
+     (let
+         ([buffer (append (cadr (cadr (car ptr))) (list msg))] ;; add new message to the pattern's buffer
+          [group (cadr opr)]
+          )
+       (cond
+         [ (eq? group (length buffer)) (cons (update-pattern (car ptr) empty) (list #t buffer ))] ;; accumulation commpleted
+         [else (cons (update-pattern (car ptr) buffer) (cadr ptr)) ]
+         )
+       )
+     ])
+  )
+
+(define (update-pattern ptr buffer)
+  (cons (car ptr) (list (car (cadr ptr)) buffer ) )
+  )
 
 ;; Match message against pattern's selector
 (define (message-match? msg ps)
@@ -110,49 +212,36 @@
   (let* ([b (string-join (map symbol->string ps) " ")]
          [c (string-append "[(list " b ") #true]")]
          [m (string-append "(match m " c "[_ #false])")])
-    (displayln ps)
-    (displayln b)
-    (displayln c)
-    (displayln m)
     m))
-
 
 
 ;(subst (x_1 v_1 e_1)) substitutes variable x_1 for value v_1 in e1.
 (define-metafunction NEST
-  ;;[v/x]x = v
+
   [(subst (x_1 any_1 x_1)) any_1]
-  ;;[v/x]x′ = x′
+ 
   [(subst (x_1 any_1 x_a)) x_a]
-  ;;[v/x]nil = nil
+
   [(subst (x any nil)) nil]
 
-
-  ;;[v/x]let x = e in e => let x = [v/x]e in [v/x]e
   [(subst (x any (let (x e_x) in e_body)))
    (let (x (subst (x any e_x))) in e_body)]
 
-  ;;[v/x]let x′= e in e = let x′ = [v/x]e in [v/x]e
   [(subst (x any (let (x_a e_xa) in e_body)))
    (let (x_a  (subst (x any e_xa))) in (subst (x any e_body)))]
 
   [(subst (x any (react-to e_rf_1 e_rf_2)))
    (react-to (subst (x any e_rf_1)) (subst (x any e_rf_2)))]
 
-
-  ;;[v/x]remove {x, e} = react{x, e}
   [(subst (x any (remove e_ref_1 e_ref_2)))
    (remove (subst (x any e_ref_1)) (subst (x any e_ref_2)))]
 
-  ;;[v/x]removeAll {x, e} = react{x, e}
   [(subst (x any (remove-reactions e_ref_1))) 
    (remove-reactions (subst (x any e_ref_1)))]
 
-  ;;[v/x]seq {x, e} = react{x, e}
   [(subst (x any (seq e_1 e_2)))
    (seq (subst (x any e_1)) (subst (x any e_2)))]
 
-  ;;[v/x]send {x, e} = send{x, e}
   [(subst (x any (send e_ref e_msg))) 
    (send (subst (x any e_ref)) e_msg )]
  
