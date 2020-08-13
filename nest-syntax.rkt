@@ -12,7 +12,7 @@
   (e ::= 
      (pattern x pb)       ;; define a join pattern
      (pattern x pb g)   
-     (reaction x x x e)   ;; define a reaction
+     (reaction x x x x e)   ;; define a reaction
      (new-actor e)        ;; define a new actor
      (react-to e e)       ;; bind a particular reaction a to pattern
      (remove e e)         ;; remove a particular reaction from a pattern
@@ -81,10 +81,12 @@
  
   (pl ::= ((x . (p  (m ...))) ...))    ;; pattern list
   (p ::= (pb g))                       ;; pattern representation
-  (pb ::= ep (lop pb pb))              ;; pattern
-  (ep ::= s (s po pt ...))             ;; elementary pattern
+  (pb ::= ep 
+          (lop pb pb))              ;; pattern
+  (ep ::= s 
+          (s po pt ...))             ;; elementary pattern
   
-  (rl ::= ((x . (x x e)) ...))             ;; reaction list
+  (rl ::= ((x . (x x x e)) ...))             ;; reaction list
 
   (pr ::= ((rf . (rf ...)) ...))         ;; pattern-reaction registry
 
@@ -118,4 +120,4 @@
   )
 
 
-;;(render-language NEST "syntax.ps")
+(render-language NEST "syntax.ps")

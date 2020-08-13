@@ -124,7 +124,7 @@
                            [v (hash-ref rh k 'nil)])
                         (cond
                           [(eq? v 'nil) acc2]
-                          [else (append acc2 (list (list-ref v 2)))])
+                          [else (append acc2 (list (list-ref v 3)))])
                         )
                       )
                     acc 

@@ -61,8 +61,8 @@
     "add-pattern-with-guard")
 
    (-->
-    (in-hole K (actor id q pl rl pr (in-hole E (reaction x_1 x_2 x_3 e))))
-    ,(term-let ([r-item (term (x_2 x_3 e))])
+    (in-hole K (actor id q pl rl pr (in-hole E (reaction x_1 x_2 x_3 x_4 e))))
+    ,(term-let ([r-item (term (x_2 x_3 x_4 e))])
                (term 
                 (in-hole K (actor id q pl (NEW-REACTION rl x_1 r-item) pr (in-hole E (ref x_1))))))
     "add-reaction")

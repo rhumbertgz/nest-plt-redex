@@ -114,42 +114,42 @@
 (define (test-reactions)
   ;; Reaction definition
   (test-->> NEST-Reductions
-            (term  ((actor id_00 () () () () (reaction r1 lm st #true))))
-            (term  ((actor id_00 () () ((r1 . (lm st #true))) () (ref r1)))))
+            (term  ((actor id_00 () () () () (reaction r1 lm ir st #true))))
+            (term  ((actor id_00 () () ((r1 . (lm ir st #true))) () (ref r1)))))
 
   ;; Multiple reaction definitions
   (test-->> NEST-Reductions
-            (term  ((actor id_10 () () () () ((reaction r1 lm st #true) (reaction r2 lm st #true)))))
-            (term  ((actor id_10 () () ((r1 . (lm st #true)) (r2 . (lm st #true))) () ((ref r1) (ref r2))))))
+            (term  ((actor id_10 () () () () ((reaction r1 lm ir st #true) (reaction r2 lm ir st #true)))))
+            (term  ((actor id_10 () () ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) () ((ref r1) (ref r2))))))
 
   ;; Reaction definition in a let expression 
   (test-->> NEST-Reductions
-            (term  ((actor id_20 () () () () (let (x (reaction r1 lm st #true)) in x))) )
-            (term  ((actor id_20 () () ((r1 . (lm st #true))) () (ref r1)))))
+            (term  ((actor id_20 () () () () (let (x (reaction r1 lm ir st #true)) in x))) )
+            (term  ((actor id_20 () () ((r1 . (lm ir st #true))) () (ref r1)))))
 
   ;; Add a reaction to pattern
   (test-->> NEST-Reductions
             (term  ((actor id_30 () () () () (let (prf (let (prf (pattern p1 (:msg x y))) in prf)) 
-                                               in  (let (rrf (reaction r1 lm st #true)) 
+                                               in  (let (rrf (reaction r1 lm ir st #true)) 
                                                      in  (react-to prf rrf))))))
-            (term  ((actor id_30 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true))) (((ref p1) . ((ref r1)))) ()))))
+            (term  ((actor id_30 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true))) (((ref p1) . ((ref r1)))) ()))))
 
 
   ;; Add a multiple reactions to pattern
   (test-->> NEST-Reductions
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) (((ref p1) . ((ref r1))))  (react-to (ref p1) (ref r2))))) 
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) (((ref p1) . ((ref r1) (ref r2)))) ()))))
+            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) (((ref p1) . ((ref r1))))  (react-to (ref p1) (ref r2))))) 
+            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) (((ref p1) . ((ref r1) (ref r2)))) ()))))
 
   ;; Remove a reaction from a pattern
   (test-->> NEST-Reductions
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) (((ref p1) . ((ref r1) (ref r2)))) (remove (ref p1) (ref r2)))))
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) (((ref p1) . ((ref r1)))) ()))))
+            (term  ((actor id_50 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) (((ref p1) . ((ref r1) (ref r2)))) (remove (ref p1) (ref r2)))))
+            (term  ((actor id_50 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) (((ref p1) . ((ref r1)))) ()))))
 
 
   ;; Remove all reaction from a pattern
   (test-->> NEST-Reductions
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) (((ref p1) . ((ref r1) (ref r2)))) (remove-reactions (ref p1)))))
-            (term  ((actor id_40 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true)) (r2 . (lm st #true))) () ()))))
+            (term  ((actor id_60 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) (((ref p1) . ((ref r1) (ref r2)))) (remove-reactions (ref p1)))))
+            (term  ((actor id_60 () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true)) (r2 . (lm ir st #true))) () ()))))
   
   )
 
@@ -171,30 +171,30 @@
   ;; Declare an actor with a single pattern and reaction
   (test-->> NEST-Reductions
             (term  ((actor root () () () () (new-actor (let (prf (pattern p1 (:msg x y))) 
-                                                         in  (let (rrf (reaction r1 lm st #true)) 
+                                                         in  (let (rrf (reaction r1 lm ir st #true)) 
                                                                in  (react-to prf rrf)))))))
             (term  ((actor root () () () () (ref id_new))  
-                    (actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true))) (((ref p1) . ((ref r1)))) ()))))
+                    (actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true))) (((ref p1) . ((ref r1)))) ()))))
 
   ;; Send a message (no-match) to an actor
   (test-->> NEST-Reductions
             (term  ((actor root () () () () (let (newActor (new-actor (let (prf (pattern p1 (:msg x y)))
-                                                                        in  (let (rrf (reaction r1 lm st #true)) 
+                                                                        in  (let (rrf (reaction r1 lm ir st #true)) 
                                                                               in  (react-to prf rrf)))))
                                               in (send newActor (:msg2 1))))))
             (term  ((actor root () () () () ())  
-                    (actor id_new ((id_msg x_tstamp (:msg2 1))) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st #true))) (((ref p1) . ((ref r1)))) ()))))
+                    (actor id_new ((id_msg x_tstamp (:msg2 1))) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true))) (((ref p1) . ((ref r1)))) ()))))
 
 
   ;; Process-message by a pattern with one reaction
   (test-->> NEST-Reductions
-            (term  ((actor id_new ((id_msg x_tstamp (:msg 1 2)) ) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st "Reaction #1") )) (((ref p1) . ((ref r1)))) nil)))
-            (term  ((actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st "Reaction #1"))) (((ref p1) . ((ref r1)))) ("Reaction #1")))))
+            (term  ((actor id_new ((id_msg x_tstamp (:msg 1 2)) ) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st "Reaction #1") )) (((ref p1) . ((ref r1)))) nil)))
+            (term  ((actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st "Reaction #1"))) (((ref p1) . ((ref r1)))) ("Reaction #1")))))
 
   ;; Process-message by a pattern with two reactions
   (test-->> NEST-Reductions
-            (term  ((actor id_new ((id_msg x_tstamp (:msg 1 2)) ) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st "Reaction #1") ) (r2 . (lm st "Reaction #2") )) (((ref p1) . ((ref r1) (ref r2)))) nil)))
-            (term  ((actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm st "Reaction #1")) (r2 . (lm st "Reaction #2") )) (((ref p1) . ((ref r1) (ref r2)))) ("Reaction #1" "Reaction #2")))))
+            (term  ((actor id_new ((id_msg x_tstamp (:msg 1 2)) ) ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st "Reaction #1") ) (r2 . (lm ir st "Reaction #2") )) (((ref p1) . ((ref r1) (ref r2)))) nil)))
+            (term  ((actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st "Reaction #1")) (r2 . (lm ir st "Reaction #2") )) (((ref p1) . ((ref r1) (ref r2)))) ("Reaction #1" "Reaction #2")))))
 
 
   )
