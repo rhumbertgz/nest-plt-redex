@@ -2,7 +2,7 @@
 
 ;; NEST:
 
-(provide NEST)  ;; Language 
+(provide NEST NEST-R)  ;; Language 
 
 (require redex)
 
@@ -10,26 +10,24 @@
 ;; NEST's BNF grammar 
 (define-language NEST
   (e ::= 
-     (pattern x pb)       ;; define a join pattern
-     (pattern x pb g)   
+     (pattern x e)       ;; define a join pattern
+     (pattern x e g)    
      (reaction x x x x e)   ;; define a reaction
      (new-actor e)        ;; define a new actor
      (react-to e e)       ;; bind a particular reaction a to pattern
      (remove e e)         ;; remove a particular reaction from a pattern
      (remove-reactions e) ;; remove all reactions associated to a pattern
      (send e e)           ;; send a message to an actor 
-     (when e e)           ;; set a guard to a pattern expression
-     (aop e e)            ;; arithmetic operations
-     (lop e e)            ;; logic operations
-     (cop e e)            ;; comparison operations
      (if e e e)
      (seq e e)
      (λ [e ...] e)        ;; define a lambda)
      (let (x e) in e)
+     (e ...) 
+     (aop e e)            ;; arithmetic operations
+     (lop e e)            ;; logic operations
+     (cop e e)            ;; comparison operations
      x
-     v
-     pb
-     (e ...)          
+     v       
   )  
 
   (x  ::= variable-not-otherwise-mentioned)
@@ -37,10 +35,18 @@
   (aop ::= + - / *)       ;;  arithmetic operators
   (lop ::= and or not)    ;;  logic operators
   (cop ::= == >= <= > <)  ;;  comparison operators
-
-  (v ::= nil number integer string boolean atom rf)   ;; values
+  (v ::= nil number integer string boolean atom)   ;; values
   (atom ::= (variable-prefix :))
- 
+  (g ::= (when e))              ;; guard expression
+                         
+
+ )
+
+;; Runtime
+(define-extended-language NEST-R NEST
+  (e ::= .... pb)
+  (v ::= .... rf)
+  (g ::= .... nil)                      ;; extend guard expression
   ;; Evaluation context
   (rf ::= (ref id))                 ;; An actor reference or ID
     
@@ -90,7 +96,8 @@
 
   (pr ::= ((rf . (rf ...)) ...))         ;; pattern-reaction registry
 
-  (g ::= nil (when e))                 ;; guard expression
+  ;(g ::= nil (when e))                 ;; guard expression
+  
  
   
 
@@ -120,4 +127,4 @@
   )
 
 
-(render-language NEST "syntax.ps")
+;;(render-language NEST "syntax.ps")
