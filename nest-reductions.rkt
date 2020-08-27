@@ -5,7 +5,7 @@
 
 (define NEST-Reductions
   (reduction-relation
-   NEST             ;; language
+   NEST-R             ;; language
    #:domain k       ;; specifies a contract, in this case declaring that red relates terms matching the pattern p.
 
    ;;  Arithmetic operations

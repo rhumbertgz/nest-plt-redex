@@ -176,6 +176,8 @@
             (term  ((actor root () () () () (ref id_new))  
                     (actor id_new () ((p1 . (((:msg x y) nil) ()))) ((r1 . (lm ir st #true))) (((ref p1) . ((ref r1)))) ()))))
 
+
+
   ;; Send a message (no-match) to an actor
   (test-->> NEST-Reductions
             (term  ((actor root () () () () (let (newActor (new-actor (let (prf (pattern p1 (:msg x y)))

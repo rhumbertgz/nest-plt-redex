@@ -6,7 +6,7 @@
 
 
 ;; Add pattern
-(define-metafunction NEST 
+(define-metafunction NEST-R 
   NEW-PATTERN : (any ...) any any -> (any ...)
   [(NEW-PATTERN (any_1 ...) any_2  any_3)
    ,(new-pattern (term (any_1 ...)) (term any_2) (term any_3))])
@@ -21,7 +21,7 @@
   )   
 
 ;; Add reaction
-(define-metafunction NEST 
+(define-metafunction NEST-R 
   NEW-REACTION : (any ...) any any -> (any ...)
   [(NEW-REACTION (any_1 ...) any_2  any_3)
    ,(new-reaction (term (any_1 ...)) (term any_2) (term any_3))])
@@ -43,7 +43,7 @@
 ;  ))
 
 ;; Add reaction to a pattern
-(define-metafunction NEST 
+(define-metafunction NEST-R 
   ADD-REACTION : (any ...) any any -> (any ...)
   [(ADD-REACTION (any_1 ...) any_2  any_3)
    ,(add-reaction (term (any_1 ...)) (term any_2) (term any_3))])
@@ -57,7 +57,7 @@
   )
 
 ;; Remove reaction from a pattern
-(define-metafunction NEST
+(define-metafunction NEST-R
   REMOVE-REACTION : (any ...) any any -> (any ...)
   [(REMOVE-REACTION (any_1 ...) any_2 any_3)
    ,(remove-reaction (term (any_1 ...)) (term any_2) (term any_3))])
@@ -72,7 +72,7 @@
 
 
 ;; Add message
-(define-metafunction NEST 
+(define-metafunction NEST-R
   ADD-MESSAGE : (any ...) any -> (any ...)
   [(ADD-MESSAGE (any_1 ...) any_2 )
    ,(add-message (term (any_1 ...)) (term any_2))])
@@ -81,7 +81,7 @@
   (append l m))
 
 
-(define-metafunction NEST 
+(define-metafunction NEST-R 
   PROCESS-MESSAGE : any any any any any any -> any
   [(PROCESS-MESSAGE any_id any_q any_p any_r any_pr any_e)
    ,(process-message (term any_id) (term any_q) (term any_p) (term any_r) (term any_pr) (term any_e))])
@@ -216,7 +216,7 @@
 
 
 ;(subst (x_1 v_1 e_1)) substitutes variable x_1 for value v_1 in e1.
-(define-metafunction NEST
+(define-metafunction NEST-R
 
   [(subst (x_1 any_1 x_1)) any_1]
  
