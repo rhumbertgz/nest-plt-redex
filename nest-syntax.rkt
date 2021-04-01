@@ -2,59 +2,96 @@
 
 ;; NEST:
 
-(provide NEST NEST-R)  ;; Language 
+(provide NEST NEST-R NEST-T)  ;; Language 
 
 (require redex)
 
 ;; Abstract syntax
 ;; NEST's BNF grammar 
 (define-language NEST
-  (e ::= 
-     (pattern x e)       ;; define a join pattern
-     (pattern x e g)    
-     (reaction x x x x e)   ;; define a reaction
-     (new-actor e)        ;; define a new actor
-     (react-to e e)       ;; bind a particular reaction a to pattern
-     (remove e e)         ;; remove a particular reaction from a pattern
-     (remove-reactions e) ;; remove all reactions associated to a pattern
-     (send e e)           ;; send a message to an actor 
-     (if e e e)
-     (seq e e)
-     (λ [e ...] e)        ;; define a lambda)
-     (let (x e) in e)
-     (e ...) 
-     (aop e e)            ;; arithmetic operations
-     (lop e e)            ;; logic operations
-     (cop e e)            ;; comparison operations
-     x
-     v       
-  )  
-
-  (x  ::= variable-not-otherwise-mentioned)
-
-  (aop ::= + - / *)       ;;  arithmetic operators
-  (lop ::= and or not)    ;;  logic operators
-  (cop ::= == >= <= > <)  ;;  comparison operators
+  (pe ::= (pattern pn p))
+  (re ::= (reaction rn e))
+  ;(ae ::= (actor an (react-to pn rn) ...))
+  (e  ::= nil
+          x l i
+          (λ [e ...] e)                            ;; define a lambda
+          (let (x e) in e)
+          (spawn an)
+          (send e e)
+          (react-to pn rn)                         ;; why here and in ae?
+          (remove rn pn)
+          (remove-reactions pn)
+          (e ...) 
+          (~ e ...)
+          (aop e e)                                ;; arithmetic operations
+          (lop e e)                                ;; logic operations
+          (cop e e)                                ;; comparison operations
+          v)
+  
+  (aop ::= + - / *)                                ;;  arithmetic operators
+  (lop ::= and or)                                 ;;  logic operators
+  (cop ::= == >= <= > <)                           ;;  comparison operators
   (v ::= nil number integer string boolean atom)   ;; values
   (atom ::= (variable-prefix :))
-  (g ::= (when e))              ;; guard expression
-                         
+  (g ::= (when e))                                 ;; guard expression
 
- )
+  (q ::= (m ...))          ;; actor's message queue 
+  (m ::= (x (t v ...))) ;; a meta-message is composed by an timestamp (receiver arrival time), and a message object
 
-;; Runtime
+  (p ::= pb                                        ;; pattern representation
+         (pb g))
+
+  (pb ::= ep 
+          (lop pb pb))                             ;; compoite pattern
+  
+  (ep ::= s                                        ;; elementary pattern
+          (s po pt ...)                            
+          (not s (window number u)))              ;; negation pattern
+
+  (t ::= atom)                                     ;; message type
+
+  (s ::= (t att ...))                              ;; pattern selector. Its first element is a constant value that represents the type of message it matches.       
+  (att ::= x v)                                    ;; selector's attribute. An attribute can be a primitive value or a logic variable (x).
+
+  (po ::= (count integer)                         ;; allows developers to accumulate "n" messages
+          (every integer)                         ;; allows developers to react every "nth" message
+          (window number u)                       ;; allows developers to specify a time window for a set of messages
+          (debounce integer u)                    ;; allows developers to specify a debounce window
+  )
+
+  (pt ::=  (fold e) (bind x)) 
+
+  ;; time units valid for message-windowing 
+  (u ::= secs mins hours days weeks)
+
+  (pl ::= ((pn . (p  (m ...))) ...))              ;; pattern list
+  (rl ::= ((rn . (e)) ...))                       ;; reaction list
+
+  (pr ::= ((pn . (rn ...)) ...))                 ;; pattern-reaction registry
+  
+  (ml ::= ((x . (x)) ...))                       ;; message list
+
+  (x  ::= variable-not-otherwise-mentioned)
+  (l  ::= variable-not-otherwise-mentioned)
+  (i  ::= variable-not-otherwise-mentioned)
+  (pn ::= variable-not-otherwise-mentioned)
+  (rn ::= variable-not-otherwise-mentioned)
+  (an ::= variable-not-otherwise-mentioned)
+  (id ::= variable-not-otherwise-mentioned)
+)
+
+
 (define-extended-language NEST-R NEST
-  (e ::= .... pb)
-  (v ::= .... rf)
-  (g ::= .... nil)                      ;; extend guard expression
-  ;; Evaluation context
-  (rf ::= (ref id))                 ;; An actor reference or ID
-    
-  (K ::= (a ... A a ...))           ;; evaluation context for K
+ (e ::= .... pe re)
+ (g ::= .... nil)  
+ (v ::= .... rf)
 
+ (rf ::= (ref id))                 ;; actor reference or ID
+              
+ (K ::= (a ... A a ...))           ;; evaluation context for K,
   (A ::= 
      hole
-     (actor id q pl rl pr E))
+     (pl rl (actor id q pr E)))
 
   (E ::= 
      hole
@@ -73,58 +110,13 @@
      (cop v E))
 
   
-  (k ::= (a ...))                   ;; a configuration K consist of a set of actors
-  (a ::= (actor id q pl rl pr e))   ;; An actor has an id, a message queue (q), a pattern list (pl), a reaction list (rl),
-                                    ;; pattern-reaction registry (pr), and a currently executing expression.
+  (k ::= (a ...))                               ;; a configuration K consist of a set of actors
+  (a ::= (pl rl (actor id q pr e))              ;; An actor has an id, a message queue (q), a pattern-reaction registry (pr), and a currently executing expression.
+         ((pl rl (actor id q pr e))))                     
 
-  
-  (q ::= (m ...))          ;; actor's message queue 
-  (m ::= (id x (t v ...))) ;; a meta-message is composed by an id, timestamp (receiver arrival time), and a message object
-  (t ::= atom)              ;; message type
+ )
 
-  (s ::= (t att ...))       ;; pattern selector. Its first element is a constant value that represents the type of message it matches.       
-  (att ::= x v)             ;; selector's attribute. An attribute can be a primitive value or a logic variable (x).
- 
-  (pl ::= ((x . (p  (m ...))) ...))    ;; pattern list
-  (p ::= (pb g))                       ;; pattern representation
-  (pb ::= ep 
-          (lop pb pb))              ;; pattern
-  (ep ::= s 
-          (s po pt ...))             ;; elementary pattern
-  
-  (rl ::= ((x . (x x x e)) ...))             ;; reaction list
-
-  (pr ::= ((rf . (rf ...)) ...))         ;; pattern-reaction registry
-
-  ;(g ::= nil (when e))                 ;; guard expression
-  
- 
-  
-
-
- 
-  ;; ##### BEGIN Operators #####
-  (po ::= (count integer)      ;; allow developers to accumulate "n" messages
-          (every integer)      ;; allows developers to react every "nth" message
-          ;(window: number u)   ;; allow developers to specify a time window for a set of messages
-          ;(debounce: integer u) ;; allow developers to specify a debounce window
+(define-extended-language NEST-T NEST-R
+  (m ::= (v (t v ...)))
   )
 
-  ;; time units valid for message-windowing 
-  ;(u ::= secs mins hours days weeks)
-
-  ;; ##### END pattern-sets #####
-
-
-  ;; ##### BEGIN transformers #####
-
-  (pt ::=  (fold e) (bind x)) 
- 
-  ;; ##### END transformers #####
-  
- (id ::= variable-not-otherwise-mentioned)
-
-  )
-
-
-;;(render-language NEST "syntax.ps")
