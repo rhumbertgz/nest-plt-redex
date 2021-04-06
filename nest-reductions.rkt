@@ -71,11 +71,25 @@
   
 
    [-->
-    (in-hole K (pl rl (actor id q pr (in-hole E (pattern x (pb g))))))
+    (in-hole K (pl rl (actor id q pr (in-hole E (pattern x (pb g)) ))))
     ,(term-let ([p-item (term ((pb g) ()))])
                (term 
                 (in-hole K ((NEW-PATTERN pl x p-item) rl (actor id q pr ())))))
     "add-pattern-with-guard"]
+
+    [-->
+    (in-hole K (pl rl (actor id q pr (in-hole E (~ (pattern x (pb g)) e_i e_x e_y ...)))))
+    ,(term-let ([p-item (term ((pb g) ()))])
+               (term 
+                (in-hole K ((NEW-PATTERN pl x p-item) rl (actor id q pr (in-hole E (~ e_i e_x e_y ...)))))))
+    "add-pattern-with-guard-from-list"]
+
+     [-->
+    (in-hole K (pl rl (actor id q pr (in-hole E (~ (pattern x (pb g))  e_i)))))
+    ,(term-let ([p-item (term ((pb g) ()))])
+               (term 
+                (in-hole K ((NEW-PATTERN pl x p-item) rl (actor id q pr (in-hole E e_i))))))
+    "add-pattern-with-guard-from-pair"]
 
    [-->
     (in-hole K (pl rl (actor id q pr (in-hole E (~ (reaction rn e) e_i e_x e_y ...)))))
@@ -222,6 +236,6 @@
 
    [ -->
      (in-hole K  (pl_a rl_a (actor id_a (m_a ... (v_tstamp e_msg)) pr_a any_a)))
-     (PROCESS-MESSAGE id_a (m_a ... (v_tstamp e_msg)) pl_a rl_a pr_a any_a)
-     "process-message"]
+     (PROCESS-RANDOM-MESSAGE id_a (m_a ... (v_tstamp e_msg)) pl_a rl_a pr_a any_a)
+     "process-random-message"]
    ))

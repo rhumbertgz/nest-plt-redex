@@ -152,9 +152,16 @@
 
   ;; Declare a simple actor with a pattern
   (test-->> NEST-Reductions
-            (term  ((() () (actor root_1 () () (new-actor (pattern p1 (:msg x y)))))))
-            (term  ((() () (actor root_1 () () (ref id_new)))  
+            (term  ((() () (actor root_0 () () (new-actor (pattern p1 (:msg x y)))))))
+            (term  ((() () (actor root_0 () () (ref id_new)))  
                     (((p1 . (((:msg x y) nil) ()))) () (actor id_new () () ())))))
+
+
+    ;; Declare an actor with a pattern and guard
+  (test-->> NEST-Reductions
+            (term  ((() () (actor root_1 () () (new-actor (pattern p1 ((:msg x y) (when (> x y)))))))))
+            (term  ((() () (actor root_1 () () (ref id_new)))  
+                    (((p1 . (((:msg x y) (when (> x y)) ) ()))) () (actor id_new () () ())))))
 
   ;; Declare a simple actor with a reaction
   (test-->> NEST-Reductions
@@ -238,33 +245,67 @@
   )
 
 ;; Execute tests
-(test-basic-syntax)
-(test-substitution)
-(test-patterns)
-(test-reactions)
-(test-actors)
+;(test-basic-syntax)
+;(test-substitution)
+;(test-patterns)
+;(test-reactions)
+;(test-actors)
 
 
-;; create a new actor and send him a message
-(traces NEST-E-Reductions
-  (term  ((() () (actor root_10 () () (let (newActor (new-actor (~ (pattern p1 (:msg x y)) (reaction r1 "Firing reaction 1") (react-to p1 r1)))) in (send newActor (:msg2 1)))))))
-)
+;; create a new actor and send a message
+;(traces NEST-E-Reductions
+;  (term  ((() () (actor root_10 () () (let (newActor (new-actor (~ (pattern p1 (:msg x y)) (reaction r1 "Firing reaction 1") (react-to p1 r1)))) in (send newActor (:msg2 1)))))))
+;)
 
 
-;; NOTE: Do not use `pattern-check` and `pattern-traces` to avoid missleiding statistics in their terminal output. 
-;; If you want to get a visual representation of the reductions and a textual summary of it use  `pattern-traces` 
-
-;  (pattern-check NEST-T-Reductions 
-;                 (term (pattern p1 (:msg x y))) 
-;                 3
+;;; #:pattern #:n-messages  #:attr-type 
+;(pattern-check NEST-T-Reductions 
+;                 #:pattern (term (pattern p1 (:msg x y))) 
+;                 #:n-messages 3)
+;
+;
+;;; pattern matching by message's type
+;(pattern-check NEST-T-Reductions 
+;                 #:pattern (term (pattern p1 (:msg x y))) 
+;                 #:n-messages 10 
+;                 #:log-output 'advanced)
+;
+;
+;;; pattern matching example with logic variables
+;;; #:attr-type ->optional arg to restrict the type of attributes to generate. Possible values: ('number  int-value) or ('string list)
+;(pattern-check NEST-T-Reductions 
+;                 #:pattern (term (pattern p1 (:msg x x))) 
+;                 #:n-messages 10 
+;                 #:attr-type (list 'number 3))
+;
+;
+;;; pattern matching with inline filter
+;(pattern-check NEST-T-Reductions 
+;                 #:pattern (term (pattern p1 (:msg 2)))                          
+;                 #:n-messages 10   
+;                 #:attr-type (list 'number 3))
+;
+;;; pattern with guard filter 
+;(pattern-check NEST-T-Reductions                                   
+;                 #:pattern (term (pattern p1 ((:msgq x y) (when (> x y)))))    
+;                 #:n-messages 2   
+;                 #:attr-type (list 'number 100)
 ;                 )
+;
+;;;pattern executed every n messages
+;(pattern-check NEST-T-Reductions                                   
+;                 #:pattern (term (pattern p1 ((:msgq x y) (every 3))))    
+;                 #:n-messages 5   
+;                 #:attr-type (list 'number 100)
+;                 #:log-output 'advanced)
 
-(pattern-traces NEST-T-Reductions 
-                 (term (pattern p1 (:msg x y))) 
-                 10
-                 )
-
-
+;;accumulation pattern example
+(pattern-check NEST-T-Reductions                                   
+                 #:pattern (term (pattern p1 ((:msgq x y) (count 2))))    
+                 #:n-messages 5   
+                 #:attr-type (list 'number 100)
+                 #:log-output 'advanced
+                 #:trace #true)
 
   (module+ test
     (test-results))
