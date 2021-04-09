@@ -245,7 +245,7 @@
   )
 
 ;; Execute tests
-;(test-basic-syntax)
+(test-basic-syntax)
 ;(test-substitution)
 ;(test-patterns)
 ;(test-reactions)
@@ -257,55 +257,6 @@
 ;  (term  ((() () (actor root_10 () () (let (newActor (new-actor (~ (pattern p1 (:msg x y)) (reaction r1 "Firing reaction 1") (react-to p1 r1)))) in (send newActor (:msg2 1)))))))
 ;)
 
-
-;;; #:pattern #:n-messages  #:attr-type 
-;(pattern-check NEST-T-Reductions 
-;                 #:pattern (term (pattern p1 (:msg x y))) 
-;                 #:n-messages 3)
-;
-;
-;;; pattern matching by message's type
-;(pattern-check NEST-T-Reductions 
-;                 #:pattern (term (pattern p1 (:msg x y))) 
-;                 #:n-messages 10 
-;                 #:log-output 'advanced)
-;
-;
-;;; pattern matching example with logic variables
-;;; #:attr-type ->optional arg to restrict the type of attributes to generate. Possible values: ('number  int-value) or ('string list)
-;(pattern-check NEST-T-Reductions 
-;                 #:pattern (term (pattern p1 (:msg x x))) 
-;                 #:n-messages 10 
-;                 #:attr-type (list 'number 3))
-;
-;
-;;; pattern matching with inline filter
-;(pattern-check NEST-T-Reductions 
-;                 #:pattern (term (pattern p1 (:msg 2)))                          
-;                 #:n-messages 10   
-;                 #:attr-type (list 'number 3))
-;
-;;; pattern with guard filter 
-;(pattern-check NEST-T-Reductions                                   
-;                 #:pattern (term (pattern p1 ((:msgq x y) (when (> x y)))))    
-;                 #:n-messages 2   
-;                 #:attr-type (list 'number 100)
-;                 )
-;
-;;;pattern executed every n messages
-;(pattern-check NEST-T-Reductions                                   
-;                 #:pattern (term (pattern p1 ((:msgq x y) (every 3))))    
-;                 #:n-messages 5   
-;                 #:attr-type (list 'number 100)
-;                 #:log-output 'advanced)
-
-;;accumulation pattern example
-(pattern-check NEST-T-Reductions                                   
-                 #:pattern (term (pattern p1 ((:msgq x y) (count 2))))    
-                 #:n-messages 5   
-                 #:attr-type (list 'number 100)
-                 #:log-output 'advanced
-                 #:trace #true)
 
   (module+ test
     (test-results))

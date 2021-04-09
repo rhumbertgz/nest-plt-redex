@@ -29,7 +29,7 @@
           v)
   
   (aop ::= + - / *)                                ;;  arithmetic operators
-  (lop ::= and or)                                 ;;  logic operators
+  (lop ::= and andThen or)                                 ;;  logic operators
   (cop ::= == >= <= > <)                           ;;  comparison operators
   (v ::= nil number integer string boolean atom)   ;; values
   (atom ::= (variable-prefix :))
