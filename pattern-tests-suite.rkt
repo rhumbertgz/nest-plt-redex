@@ -38,17 +38,14 @@
     ))
 
 (define (decompose-pattern expr [selectors empty] [guard 'nil] [operators (make-immutable-hash)] [members empty])
-  (if (empty? expr)
-      (let ([result (make-hash)])
+  (cond
+    [(empty? expr) (let ([result (make-hash)])
         (hash-set! result 'selectors selectors)
         (hash-set! result 'guard guard)
         (hash-set! result 'operators operators)
         (hash-set! result 'members (set-member-constraints members))
-        result
-        )
-     
-
-      (let* ([f (first expr)])
+        result)  ]
+    [else (let* ([f (first expr)])
         (log  f)
         (cond
           ;; expr = (and (:msg1 a b) (:msg1 c d))
@@ -74,11 +71,7 @@
              [(list? f) (log 6.5)  (decompose-pattern (rest expr) (add-selector f selectors) guard operators (add-member (get-first f) members)) ]
              ;; expr = (:msgq x x)
              [else (log 7)  (decompose-pattern empty (add-selector expr selectors) guard operators (add-member (get-first f) members))]
-             )
-           ]
-          )
-        ))
-  )
+             )]))]))
 
 ;; p - pattern  #hash((guard . nil) (members . #hash((:msgq . #hash((index . 0) (parent . nil))))) (operators . #hash()) (selectors . ((:msgq x y))))
 ;; n - number of targeted activations
