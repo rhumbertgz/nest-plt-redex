@@ -1,6 +1,6 @@
 #lang racket
 
-(require redex  "nest-reductions.rkt" "nest-utils.rkt")
+(require redex   "nest-utils.rkt" "nest-reductions.rkt")
 
 ;; ##### BEGIN Basic Syntax Tests #####
 (define (test-basic-syntax)
@@ -246,10 +246,10 @@
 
 ;; Execute tests
 (test-basic-syntax)
-;(test-substitution)
-;(test-patterns)
-;(test-reactions)
-;(test-actors)
+(test-substitution)
+(test-patterns)
+(test-reactions)
+(test-actors)
 
 
 ;; create a new actor and send a message

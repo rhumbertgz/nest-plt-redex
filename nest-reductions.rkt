@@ -1,6 +1,6 @@
 #lang racket
 
-(require redex "nest-syntax.rkt" "nest-utils.rkt")
+(require redex "nest-syntax.rkt" "reduction-relation-helpers.rkt" "nest-utils.rkt" )
 (provide NEST-Reductions NEST-E-Reductions NEST-T-Reductions)
 
 

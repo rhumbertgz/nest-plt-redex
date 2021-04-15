@@ -18,7 +18,7 @@
           (let (x e) in e)
           (spawn an)
           (send e e)
-          (react-to pn rn)                         ;; why here and in ae?
+          (react-to pn rn)                         
           (remove rn pn)
           (remove-reactions pn)
           (e ...) 
